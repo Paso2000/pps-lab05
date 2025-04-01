@@ -27,6 +27,10 @@ object Vector2D:
   // Factory method to create Vector2D instances
   def apply(x: Double, y: Double): Vector2D = ???
 
+
+
+
+
   // Common vectors (optional but nice)
   val zero: Vector2D = apply(0.0, 0.0)
   val i: Vector2D = apply(1.0, 0.0) // Unit vector along x-axis
