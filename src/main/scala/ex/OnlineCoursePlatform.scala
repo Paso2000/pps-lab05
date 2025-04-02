@@ -109,33 +109,41 @@ object OnlineCoursePlatform:
   private class OnlineCoursePlatformImpl() extends OnlineCoursePlatform:
 
     private var courseList: Sequence[Course] = Nil()
+    private var enrollments: Sequence[(String,String)] = Nil()
 
     def addCourse(course: Course): Unit =
-      courseList = Cons(course,courseList)
+      this.courseList = Cons(course,courseList)
 
     override def removeCourse(course: Course): Unit =
-      courseList.filter(_.courseId != course.courseId)
+     this.courseList = this.courseList.filter(_.courseId != course.courseId)
 
 
     override def getCourse(courseId: String): Optional[Course] =
-        courseList.find(_.courseId == courseId)
+        this.courseList.find(_.courseId == courseId)
 
     override def isCourseAvailable(courseId: String): Boolean =
       !getCourse(courseId).isEmpty
 
 
-
-
     override def findCoursesByCategory(category: String): Sequence[Course] =
-      courseList.filter(_.category == category)
+      this.courseList.filter(_.category == category)
 
-    override def isStudentEnrolled(studentId: String, courseId: String): Boolean = ???
+    def enrollStudent(studentId: String, courseId: String): Unit =
+      this.enrollments = Cons((studentId, courseId), enrollments)
 
-    override def unenrollStudent(studentId: String, courseId: String): Unit = ???
+    override def isStudentEnrolled(studentId: String, courseId: String): Boolean =
+      this.enrollments.contains((studentId, courseId))
 
-    override def enrollStudent(studentId: String, courseId: String): Unit = ???
+    override def unenrollStudent(studentId: String, courseId: String): Unit =
+      this.enrollments = this.enrollments.filter(e => e._1 != studentId || e._2 != courseId)
 
-    override def getStudentEnrollments(studentId: String): Sequence[Course] = ???
+
+    override def getStudentEnrollments(studentId: String): Sequence[Course] =
+      this.enrollments.filter(_._1 == studentId).map(e => getCourse(e._2)).flatMap {
+        case Just(course) => Cons(course, Nil())
+        case _ => Nil()
+      }
+
 
 /**
  * Represents an online learning platform that offers courses and manages student enrollments.
@@ -151,7 +159,6 @@ object OnlineCoursePlatform:
  *
  */
 @main def mainPlatform(): Unit =
-  println("ciao")
   val platform = OnlineCoursePlatform()
 
   val scalaCourse = Course("SCALA01", "Functional Programming in Scala", "Prof. Odersky", "Programming")
@@ -172,24 +179,24 @@ object OnlineCoursePlatform:
   println(s"Get UNKNOWN01: ${platform.getCourse("UNKNOWN01")}") // Optional.Empty
 
   // Enrollments
-//  val studentAlice = "Alice123"
-//  val studentBob = "Bob456"
-//
-//  println(s"Is Alice enrolled in SCALA01? ${platform.isStudentEnrolled(studentAlice, "SCALA01")}") // false
-//  platform.enrollStudent(studentAlice, "SCALA01")
-//  println(s"Is Alice enrolled in SCALA01? ${platform.isStudentEnrolled(studentAlice, "SCALA01")}") // true
-//  platform.enrollStudent(studentAlice, "DESIGN01")
-//  platform.enrollStudent(studentBob, "SCALA01") // Bob also enrolls in Scala
-//
-//  println(s"Alice's enrollments: ${platform.getStudentEnrollments(studentAlice)}") // Sequence(scalaCourse, designCourse) - Order might vary
-//  println(s"Bob's enrollments: ${platform.getStudentEnrollments(studentBob)}") // Sequence(scalaCourse)
-//
-//  platform.unenrollStudent(studentAlice, "SCALA01")
-//  println(s"Is Alice enrolled in SCALA01? ${platform.isStudentEnrolled(studentAlice, "SCALA01")}") // false
-//  println(s"Alice's enrollments: ${platform.getStudentEnrollments(studentAlice)}") // Sequence(designCourse)
-//
-//  // Removal
-//  platform.removeCourse(pythonCourse)
-//  println(s"Is PYTHON01 available? ${platform.isCourseAvailable(pythonCourse.courseId)}") // false
-//  println(s"Programming courses: ${platform.findCoursesByCategory("Programming")}") // Sequence(scalaCourse)
+  val studentAlice = "Alice123"
+  val studentBob = "Bob456"
+
+  println(s"Is Alice enrolled in SCALA01? ${platform.isStudentEnrolled(studentAlice, "SCALA01")}") // false
+  platform.enrollStudent(studentAlice, "SCALA01")
+  println(s"Is Alice enrolled in SCALA01? ${platform.isStudentEnrolled(studentAlice, "SCALA01")}") // true
+  platform.enrollStudent(studentAlice, "DESIGN01")
+  platform.enrollStudent(studentBob, "SCALA01") // Bob also enrolls in Scala
+
+  println(s"Alice's enrollments: ${platform.getStudentEnrollments(studentAlice)}") // Sequence(scalaCourse, designCourse) - Order might vary
+  println(s"Bob's enrollments: ${platform.getStudentEnrollments(studentBob)}") // Sequence(scalaCourse)
+
+  platform.unenrollStudent(studentAlice, "SCALA01")
+  println(s"Is Alice enrolled in SCALA01? ${platform.isStudentEnrolled(studentAlice, "SCALA01")}") // false
+  println(s"Alice's enrollments: ${platform.getStudentEnrollments(studentAlice)}") // Sequence(designCourse)
+
+  // Removal
+  platform.removeCourse(pythonCourse)
+  println(s"Is PYTHON01 available? ${platform.isCourseAvailable(pythonCourse.courseId)}") // false
+  println(s"Programming courses: ${platform.findCoursesByCategory("Programming")}") // Sequence(scalaCourse)
 
