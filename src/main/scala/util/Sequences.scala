@@ -2,6 +2,8 @@ package util
 import Optionals.Optional.*
 import util.Optionals.Optional
 
+import scala.annotation.tailrec
+
 object Sequences: // Essentially, generic linkedlists
   
   enum Sequence[E]:
@@ -48,12 +50,21 @@ object Sequences: // Essentially, generic linkedlists
 
       def contains(e: A): Boolean = !sequence.find(_ == e).isEmpty
 
+      def size: Int =
+        @tailrec
+        def sizeImpl(sequence: Sequence[A], acc: Int ): Int = sequence match
+          case Cons(h,t) => sizeImpl(t,acc+1)
+          case _ => acc
+
+        sizeImpl(sequence, 0)
+
       def reverse(): Sequence[A] = sequence match
         case Cons(h, t) => t.reverse().concat(Cons(h, Nil()))
         case _ => Nil()
 @main def trySequences =
   import Sequences.* 
   val sequence = Sequence(1, 2, 3)
+  println(sequence.size)
   println(sequence)
   println(sequence.head)
   println(sequence.map(_ * 2))
