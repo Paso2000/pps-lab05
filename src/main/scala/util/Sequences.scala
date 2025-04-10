@@ -61,6 +61,11 @@ object Sequences: // Essentially, generic linkedlists
       def reverse(): Sequence[A] = sequence match
         case Cons(h, t) => t.reverse().concat(Cons(h, Nil()))
         case _ => Nil()
+
+      def forall(p: A => Boolean): Boolean = sequence match
+        case Nil() => true // Tutti gli elementi di una lista vuota soddisfano qualsiasi predicato
+        case Cons(h, t) => p(h) && t.forall(p)
+
 @main def trySequences =
   import Sequences.* 
   val sequence = Sequence(1, 2, 3)

@@ -14,7 +14,7 @@ trait Logicss:
 
 /** solution and descriptions at https://bitbucket.org/mviroli/oop2019-esami/src/master/a01b/sol2/ */
 class LogicsImpl(private val size: Int, private val mines: Int) extends Logicss:
-  private val random = new Random(42)
+  private val random = new Random()
   private val mineCells: Sequence[(Int, Int)] = defineMinesCell
   private var selectedCells: Sequence[(Int,Int)] = Nil()
   private def defineMinesCell: Sequence[(Int,Int)] =
